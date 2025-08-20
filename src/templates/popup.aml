@@ -1,0 +1,2 @@
+border [background: "red", foreground: "black", fill: " "]
+    text attributes.message

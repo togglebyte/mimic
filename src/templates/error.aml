@@ -1,0 +1,4 @@
+align [alignment: "centre"]
+    border [background: "red", foreground: "black", fill: " "]
+        padding [padding: 2]
+            text "Error: " attributes.error

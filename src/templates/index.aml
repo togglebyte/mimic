@@ -1,0 +1,34 @@
+let from = -state.offset_y + 1
+let to = state.height + from
+let range = from .. to
+let width = width(to)
+
+zstack
+    vstack
+        expand
+            hstack
+                if state.show_line_numbers
+                    vstack
+                        for line_no in range
+                            border [sides: "right", width: width + 1]
+                                text line_no
+
+                vstack
+                    // Editor
+                    container 
+                        expand
+                            zstack
+                                canvas
+                                position [left: state.screen_cursor_x, top: state.screen_cursor_y]
+                                    container [height: 1, width: 1, foreground: "black", background: "green"]
+
+                                if state.popup
+                                    position [left: state.screen_cursor_x, top: state.screen_cursor_y]
+                                        @popup [message: state.popup]
+
+        // Status bar
+        @status [row: state.cursor_y, col: state.cursor_x, title: state.title, debug: state.debug]
+
+    if state.error
+        @error [error: state.error]
+

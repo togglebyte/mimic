@@ -1,0 +1,34 @@
+[package]
+name = "mimic"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "A text / code playback tool"
+homepage = "https://github.com/togglebyte/mimic"
+repository = "https://github.com/togglebyte/mimic"
+publish = true
+
+[dependencies]
+anyhow = "1.0.98"
+anathema = "0.2.11"
+unicode-width = "0.2.1"
+dirs = "6.0.0"
+syntect = { version = "5.2.0" }
+kira = "0.10.8"
+
+[profile.release]
+strip = true
+lto = true
+panic = "abort"
+
+[lints.rust]
+rust_2018_idioms = "deny"
+
+[lints.clippy]
+from_over_into = "allow"
+len_without_is_empty = "allow"
+new_without_default = "allow"
+should_implement_trait = "allow"
+type_complexity = "allow"
+too_many_arguments = "allow"
+wrong_self_convention = "allow"

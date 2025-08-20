@@ -1,0 +1,7 @@
+load "src/main.rs" as main
+extension "rs"
+speed 20
+jitter 20
+linepause 300
+
+type main
