@@ -42,6 +42,7 @@ pub enum Token {
     Type,
     TypeNl,
     Wait,
+    WriteBuffer,
 
     // Eof
     Eof,
@@ -89,6 +90,7 @@ impl Display for Token {
             Token::Type => write!(f, "type"),
             Token::TypeNl => write!(f, "typenl"),
             Token::Wait => write!(f, "wait"),
+            Token::WriteBuffer => write!(f, "write buffer"),
 
             Token::Eof => write!(f, "EOF"),
 

@@ -69,6 +69,7 @@ impl<'src> Parser<'src> {
             Token::Audio => self.audio(),
             Token::Popup => self.popup(),
             Token::ClosePopup => self.closepopup(),
+            Token::WriteBuffer => self.write_buffer(),
             Token::Wait => self.wait(),
             token => Error::invalid_instruction(token, self.tokens.spans(), self.tokens.source),
         }
@@ -296,6 +297,15 @@ impl<'src> Parser<'src> {
 
     fn closepopup(&mut self) -> Result<Instruction> {
         Ok(Instruction::ClosePopup)
+    }
+
+    fn write_buffer(&mut self) -> Result<Instruction> {
+        let instr = match self.tokens.take() {
+            Token::Str(path) => Instruction::WriteBuffer(path.into()),
+            token => return Error::invalid_arg("string", token, self.tokens.spans(), self.tokens.source),
+        };
+
+        Ok(instr)
     }
 
     fn wait(&mut self) -> Result<Instruction> {

@@ -4,8 +4,8 @@ use anathema::geometry::Size;
 use unicode_width::UnicodeWidthStr;
 
 pub use super::context::Context;
-use super::instructions::Instruction;
 use super::error::{Error, Result};
+use super::instructions::Instruction;
 use crate::parser::{Dest, Source};
 
 pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<Instruction>> {
@@ -23,11 +23,13 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
                 end_of_word: false,
                 count,
             }),
-            crate::parser::Instruction::FindEnd { needle, count } => instructions.push(Instruction::FindInCurrentLine {
-                needle,
-                end_of_word: true,
-                count,
-            }),
+            crate::parser::Instruction::FindEnd { needle, count } => {
+                instructions.push(Instruction::FindInCurrentLine {
+                    needle,
+                    end_of_word: true,
+                    count,
+                })
+            }
             crate::parser::Instruction::Goto(dest) => {
                 let inst = match dest {
                     Dest::Relative { row, col } => Instruction::Jump((col, row).into()),
@@ -86,7 +88,9 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
                 };
                 instructions.push(inst);
             }
-            crate::parser::Instruction::Wait(seconds) => instructions.push(Instruction::Wait(Duration::from_secs(seconds))),
+            crate::parser::Instruction::Wait(seconds) => {
+                instructions.push(Instruction::Wait(Duration::from_secs(seconds)))
+            }
             crate::parser::Instruction::Speed(instructions_per_second) => {
                 let ips = instructions_per_second as f64;
                 let micros = (1000_000.0 / ips) as u64;
@@ -108,6 +112,7 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
                 instructions.push(Instruction::Popup(msg))
             }
             crate::parser::Instruction::ClosePopup => instructions.push(Instruction::ClosePopup),
+            crate::parser::Instruction::WriteBuffer(path) => instructions.push(Instruction::WriteBuffer(path)),
         }
     }
 

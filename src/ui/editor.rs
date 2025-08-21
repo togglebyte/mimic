@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::io::Write;
 use std::time::Duration;
 
 use anathema::component::*;
@@ -296,6 +297,17 @@ impl Editor {
                     }
                     Instruction::Popup(message) => state.popup.set(message),
                     Instruction::ClosePopup => state.popup.set(String::new()),
+                    Instruction::WriteBuffer(path_buf) if path_buf.exists() => {
+                        self.error(state, format!("can't write to {path_buf:?}, file already exists"));
+                    }
+                    Instruction::WriteBuffer(path_buf) => match std::fs::File::create(&path_buf) {
+                        Err(e) => self.error(state, format!("failed to create {path_buf:?} : {e}")),
+                        Ok(mut file) => {
+                            if let Err(e) = file.write_all(self.doc.text().as_bytes()) {
+                                self.error(state, format!("failed to write {path_buf:?} : {e}"));
+                            }
+                        }
+                    },
                 }
             }
         }
@@ -414,7 +426,10 @@ impl Component for Editor {
             match self.apply(state) {
                 RenderAction::Render => render = true,
                 RenderAction::Skip => (),
-                RenderAction::NextFrame => break,
+                RenderAction::NextFrame => {
+                    render = true;
+                    break;
+                }
             }
         }
 

@@ -27,6 +27,7 @@ pub enum Source {
 #[derive(Debug, PartialEq)]
 pub enum Instruction {
     Load(PathBuf, String),
+    WriteBuffer(PathBuf),
     Find { needle: String, count: usize },
     FindEnd { needle: String, count: usize },
     Goto(Dest),

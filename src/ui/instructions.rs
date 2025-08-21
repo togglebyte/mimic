@@ -47,4 +47,6 @@ pub enum Instruction {
     Popup(String),
     ClosePopup,
     Clear,
+
+    WriteBuffer(PathBuf),
 }

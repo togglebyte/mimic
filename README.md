@@ -218,3 +218,10 @@ Same as `find` but places the cursor at the end of the result instead of the
 start.
 
 Syntax: `finde <string> <int>?`
+
+## Write
+
+Write the buffer to disk. 
+This will fail if the file already exists.
+
+Syntax: `write <path>`.

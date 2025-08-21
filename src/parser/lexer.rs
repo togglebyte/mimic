@@ -174,6 +174,7 @@ impl<'src> Lexer<'src> {
             "type" => Token::Type,
             "typenl" => Token::TypeNl,
             "wait" | "sleep" => Token::Wait,
+            "write" => Token::WriteBuffer,
             _ => Token::Ident(buffer),
         };
         self.push_token(token);
