@@ -2,7 +2,7 @@
 
 Script and playback of text with syntax highlighting.
 
-[Example.mp4](https://github.com/user-attachments/assets/37fe4101-d768-4c64-aa6f-1eb827d7beff)
+[Mimic.mp4](https://github.com/user-attachments/assets/28010dd5-edc7-4a32-ac5c-eab1f6a82fd8)
 
 ## Example
 
@@ -26,6 +26,18 @@ $ mimic example.echo
 
 To add syntax highlighting for a language currently not included:
 Copy the directory into your equivalent of `~/.config/mimic/syntax/<lang>`.
+
+## Changing the UI
+
+Mimic was made with [Anathema](https://crates.io/crates/anathema) and the
+templates are installed by default the first time the program is run.
+
+The templates are located in the following directories depending on your
+platform: 
+
+* Lin: `~/.config/mimic/templates`
+* Win: `C:\Users\<user>\AppData\Roaming\mimic\templates`
+* Mac: `/Users/<user>/Library/Application Support/mimic/templates`
 
 ### Example
 
