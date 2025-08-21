@@ -82,6 +82,7 @@ impl Timer {
 enum RenderAction {
     Render,
     Skip,
+    NextFrame,
 }
 
 // -----------------------------------------------------------------------------
@@ -193,6 +194,7 @@ impl Editor {
 
                 if self.line_pause > Duration::ZERO {
                     self.frame_timer.wait(self.line_pause);
+                    return RenderAction::NextFrame;
                 }
             } else {
                 self.cursor.x += s.width() as i32;
@@ -406,8 +408,10 @@ impl Component for Editor {
 
         while count > 0 {
             count -= 1;
-            if let RenderAction::Render = self.apply(state) {
-                render = true;
+            match self.apply(state) {
+                RenderAction::Render => render = true,
+                RenderAction::Skip => (),
+                RenderAction::NextFrame => break,
             }
         }
 
