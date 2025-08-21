@@ -259,7 +259,10 @@ impl Editor {
                         }
                         None => self.doc.delete(Region::from((self.cursor, Size::new(1, 1)))),
                     },
-                    Instruction::Wait(dur) => self.frame_timer.wait(dur),
+                    Instruction::Wait(dur) => {
+                        self.frame_timer.wait(dur);
+                        return RenderAction::NextFrame;
+                    }
                     Instruction::Speed(dur) => self.frame_timer.frame_time = dur,
                     Instruction::FindInCurrentLine {
                         needle,
