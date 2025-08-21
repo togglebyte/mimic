@@ -15,11 +15,78 @@ use super::random::Random;
 use super::syntax::{Highlighter, InactiveScratch};
 use super::textbuffer::TextBuffer;
 
+// -----------------------------------------------------------------------------
+//   - Frame timer -
+// -----------------------------------------------------------------------------
+struct Timer {
+    frame_time: Duration,
+    accumulator: Duration,
+    wait: Duration,
+    jitter: Duration,
+    jitter_ms: u64,
+    rand: Random,
+}
+
+impl Timer {
+    pub fn new(frame_time: Duration) -> Self {
+        Self {
+            frame_time,
+            accumulator: Duration::ZERO,
+            wait: Duration::ZERO,
+            jitter: Duration::ZERO,
+            jitter_ms: 20,
+            rand: Random::new(),
+        }
+    }
+
+    fn apply_jitter(&mut self) {
+        self.wait += self.jitter;
+        self.jitter = Duration::from_millis(self.rand.next(self.jitter_ms));
+    }
+
+    fn tick(&mut self, mut dt: Duration) -> usize {
+        if !self.wait.is_zero() {
+            match self.wait.checked_sub(dt) {
+                Some(wait) => {
+                    self.wait = wait;
+                    return 0;
+                }
+                None => {
+                    self.wait = Duration::ZERO;
+                    dt -= self.wait;
+                }
+            }
+        } else {
+            self.apply_jitter();
+        }
+
+        self.accumulator += dt;
+
+        let mut count = 0;
+        while self.accumulator >= self.frame_time {
+            self.accumulator = self.accumulator.saturating_sub(self.frame_time);
+            count += 1;
+        }
+
+        count
+    }
+
+    fn wait(&mut self, wait: Duration) {
+        self.wait = wait;
+    }
+}
+
+// -----------------------------------------------------------------------------
+//   - Render action -
+// -----------------------------------------------------------------------------
 enum RenderAction {
     Render,
     Skip,
 }
 
+// -----------------------------------------------------------------------------
+//   - State -
+// -----------------------------------------------------------------------------
 #[derive(Debug, State, Default)]
 pub struct DocState {
     screen_cursor_x: Value<i32>,
@@ -73,19 +140,17 @@ pub struct Editor {
     cursor: Pos,
     offset: Pos,
     selected_range: Option<VisualRange>,
-    frame_time: Duration,
-    current_time: Duration,
     instructions: VecDeque<Instruction>,
     type_buffer: TextBuffer,
     highlighter: Highlighter,
-    rand: Random,
     buffer: CanvasBuffer,
     lines: InactiveScratch,
     line_pause: Duration,
     extension: String,
-    jitter: u64,
     theme: String,
     audio: AudioShell,
+    frame_timer: Timer,
+    size: Size,
 }
 
 impl Editor {
@@ -95,19 +160,17 @@ impl Editor {
             cursor: Pos::ZERO,
             offset: Pos::ZERO,
             selected_range: None,
-            frame_time,
-            current_time: Duration::ZERO,
             instructions: instructions.into(),
             type_buffer: TextBuffer::new(),
             highlighter,
-            rand: Random::new(),
             buffer: CanvasBuffer::default(),
             lines: InactiveScratch::new(),
             line_pause: Duration::ZERO,
             extension: "txt".into(),
-            jitter: 20,
             theme: String::from("togglebit"),
             audio: AudioShell::new(),
+            frame_timer: Timer::new(frame_time),
+            size: Size::ZERO,
         }
     }
 
@@ -129,7 +192,7 @@ impl Editor {
                 self.cursor.y += 1;
 
                 if self.line_pause > Duration::ZERO {
-                    self.current_time = self.line_pause;
+                    self.frame_timer.wait(self.line_pause);
                 }
             } else {
                 self.cursor.x += s.width() as i32;
@@ -194,9 +257,13 @@ impl Editor {
                         }
                         None => self.doc.delete(Region::from((self.cursor, Size::new(1, 1)))),
                     },
-                    Instruction::Wait(dur) => self.current_time = dur,
-                    Instruction::Speed(dur) => self.frame_time = dur,
-                    Instruction::FindInCurrentLine { needle, end_of_word, count } => {
+                    Instruction::Wait(dur) => self.frame_timer.wait(dur),
+                    Instruction::Speed(dur) => self.frame_timer.frame_time = dur,
+                    Instruction::FindInCurrentLine {
+                        needle,
+                        end_of_word,
+                        count,
+                    } => {
                         if needle.is_empty() {
                             return RenderAction::Render;
                         }
@@ -208,7 +275,7 @@ impl Editor {
                     }
                     Instruction::LinePause(duration) => self.line_pause = duration,
                     Instruction::SetTitle(title) => state.title.set(title),
-                    Instruction::SetJitter(jitter) => self.jitter = jitter,
+                    Instruction::SetJitter(jitter) => self.frame_timer.jitter_ms = jitter,
                     Instruction::ShowLineNumbers(show) => state.show_line_numbers.set(show),
                     Instruction::Clear => {
                         self.doc.clear();
@@ -231,11 +298,11 @@ impl Editor {
         RenderAction::Render
     }
 
-    fn update_cursor(&mut self, size: Size, state: &mut DocState) {
+    fn update_cursor(&mut self, state: &mut DocState) {
         static PADDING: i32 = 7;
 
-        let height = size.height as i32 - 1 - PADDING;
-        let width = size.width as i32 - 1;
+        let height = self.size.height as i32 - 1 - PADDING;
+        let width = self.size.width as i32 - 1;
 
         let y = self.cursor.y + self.offset.y;
         if y > height {
@@ -327,21 +394,25 @@ impl Component for Editor {
         _: Context<'_, '_, Self::State>,
         dt: Duration,
     ) {
-        let Some(size) = children.elements().by_tag("canvas").first(|el, _| el.size()) else {
-            return;
-        };
-
-        state.height.set(size.height);
-
-        self.current_time = self.current_time.saturating_sub(dt);
-
-        if self.current_time > Duration::ZERO {
-            return;
+        if self.size == Size::ZERO {
+            let Some(size) = children.elements().by_tag("canvas").first(|el, _| el.size()) else { return };
+            self.size = size;
         }
 
-        self.current_time = self.frame_time + Duration::from_millis(self.rand.next(self.jitter));
-        if let RenderAction::Render = self.apply(state) {
-            self.update_cursor(size, state);
+        state.height.set(self.size.height);
+
+        let mut count = self.frame_timer.tick(dt);
+        let mut render = false;
+
+        while count > 0 {
+            count -= 1;
+            if let RenderAction::Render = self.apply(state) {
+                render = true;
+            }
+        }
+
+        if render {
+            self.update_cursor(state);
             self.draw(children.elements(), state);
         }
     }
@@ -360,5 +431,12 @@ impl Component for Editor {
             .by_tag("canvas")
             .first(|el, _| el.to::<Canvas>().take_buffer())
             .unwrap();
+    }
+
+    fn on_resize(&mut self, state: &mut Self::State, mut children: Children<'_, '_>, _: Context<'_, '_, Self::State>) {
+        if let Some(size) = children.elements().by_tag("canvas").first(|el, _| el.size()) {
+            self.size = size;
+            state.height.set(size.height);
+        }
     }
 }

@@ -58,6 +58,7 @@ impl Audio {
         let sound = match name {
             "\n" => self.get_sound("enter"),
             " " => self.get_sound("space"),
+            ";" | "<" | ">" => self.get_sound("semicolon"),
             name => self.get_sound(name),
         };
         _ = self.manager.play(sound);

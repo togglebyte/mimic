@@ -118,11 +118,9 @@ Syntax: `wait <seconds>`
 
 ## Speed
 
-Note: this is a terrible name and will change soon
+This value is given in number of instructions per second.
 
-Set the speed for which commands are executed / content is typed
-
-Syntax: `speed <milliseconds>`
+Syntax: `speed <integer>`
 Default: `20`
 
 ## Line pause
@@ -160,10 +158,10 @@ Default: `"txt"`
 
 ## Jitter
 
-Pad the frame time with some jitter, making for a more natural appearance of
-typing.
+Pad the frame time with some jitter, making for a more natural appearance of typing.
 
 Syntax: `jitter 25`
+Default: `20`
 
 ## Theme
 

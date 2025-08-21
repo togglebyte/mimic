@@ -87,7 +87,11 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
                 instructions.push(inst);
             }
             crate::parser::Instruction::Wait(seconds) => instructions.push(Instruction::Wait(Duration::from_secs(seconds))),
-            crate::parser::Instruction::Speed(millis) => instructions.push(Instruction::Speed(Duration::from_millis(millis))),
+            crate::parser::Instruction::Speed(instructions_per_second) => {
+                let ips = instructions_per_second as f64;
+                let micros = (1000_000.0 / ips) as u64;
+                instructions.push(Instruction::Speed(Duration::from_micros(micros)))
+            }
             crate::parser::Instruction::LinePause(millis) => {
                 instructions.push(Instruction::LinePause(Duration::from_millis(millis)))
             }
