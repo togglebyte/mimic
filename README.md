@@ -2,6 +2,8 @@
 
 Script and playback of text with syntax highlighting.
 
+[Example.mp4](https://github.com/user-attachments/assets/37fe4101-d768-4c64-aa6f-1eb827d7beff)
+
 ## Example
 
 Create a `example.echo` file and add the following code:
