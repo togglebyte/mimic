@@ -18,6 +18,10 @@ pub enum Instruction {
     // * Require new highlighting
     // * If the `content` contains a newline then offset all the subsequent markers
     LoadTypeBuffer(String),
+    LoadCommandBuffer(String),
+    ClearCommandBuffer,
+    ClearCommandWait,
+    CommandClearTimeout(Duration),
     // Inserts all the content at once, unlike Type which types the content out
     // character by character
     Insert(String),

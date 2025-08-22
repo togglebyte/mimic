@@ -2,11 +2,12 @@ use std::time::Duration;
 
 use anathema::prelude::*;
 pub use compile::compile;
+use error::Result;
 
 use self::editor::Editor;
 use self::instructions::Instruction;
 use self::syntax::Highlighter;
-use error::Result;
+use crate::ui::editor::DocState;
 
 mod audio;
 mod compile;
@@ -109,7 +110,7 @@ pub fn run(instructions: Vec<Instruction>) -> Result<()> {
 
     let template_root = dirs::config_dir().unwrap().join("mimic").join("templates");
 
-    builder.component("index", template_root.join("index.aml"), editor, Default::default())?;
+    builder.component("index", template_root.join("index.aml"), editor, DocState::new())?;
     builder.template("status", template_root.join("status.aml"))?;
     builder.template("error", template_root.join("error.aml"))?;
     builder.template("popup", template_root.join("popup.aml"))?;

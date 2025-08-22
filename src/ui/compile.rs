@@ -60,6 +60,15 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
                 }
                 instructions.push(Instruction::LoadTypeBuffer(content));
             }
+            crate::parser::Instruction::Command(source) => {
+                let cmd = match source {
+                    Source::Str(cmd) => cmd,
+                    Source::Ident(key) => context.load(key)?,
+                };
+                instructions.push(Instruction::LoadCommandBuffer(cmd));
+                instructions.push(Instruction::ClearCommandWait);
+                instructions.push(Instruction::ClearCommandBuffer);
+            }
             crate::parser::Instruction::Insert(source) => {
                 let inst = match source {
                     Source::Str(content) => Instruction::Insert(content),
@@ -113,6 +122,9 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
             }
             crate::parser::Instruction::ClosePopup => instructions.push(Instruction::ClosePopup),
             crate::parser::Instruction::WriteBuffer(path) => instructions.push(Instruction::WriteBuffer(path)),
+            crate::parser::Instruction::CommandClearTimeout(timeout) => {
+                instructions.push(Instruction::CommandClearTimeout(Duration::from_millis(timeout)))
+            }
         }
     }
 

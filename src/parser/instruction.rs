@@ -36,6 +36,8 @@ pub enum Instruction {
         trim_trailing_newline: bool,
         prefix_newline: bool,
     },
+    Command(Source),
+    CommandClearTimeout(u64),
     Insert(Source),
     Jitter(u64),
     Delete,

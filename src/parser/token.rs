@@ -24,6 +24,8 @@ pub enum Token {
     // Actions
     Clear,
     ClosePopup,
+    Command,
+    CommandClear,
     Find,
     FindEnd,
     Goto,
@@ -72,6 +74,8 @@ impl Display for Token {
             Token::Audio => write!(f, "audio"),
             Token::Clear => write!(f, "clear"),
             Token::ClosePopup => write!(f, "close popup"),
+            Token::Command => write!(f, "command"),
+            Token::CommandClear => write!(f, "command clear"),
             Token::Find => write!(f, "find"),
             Token::FindEnd => write!(f, "findend"),
             Token::Goto => write!(f, "goto"),

@@ -1,3 +1,8 @@
+* 0.1.5
+    * New `command` command that prints to the command line of the editor
+    * New `command_clear_timeout` command that clears the command line after a while
+    * `linepause` and `line_pause` both works
+    * `closepopup` and `close_popup` both works
 * 0.1.4
     * New `write` command that writes the buffer to disk
     * BUGFIX: newline chars didn't render if they were the last instructions

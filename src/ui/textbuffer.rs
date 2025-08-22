@@ -1,5 +1,8 @@
 static TAB: &str = "    ";
 
+// -----------------------------------------------------------------------------
+//   - Text buffer -
+// -----------------------------------------------------------------------------
 /// This is text that should be typed out by the editor
 pub struct TextBuffer {
     inner: String,

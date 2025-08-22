@@ -19,12 +19,20 @@ zstack
                         expand
                             zstack
                                 canvas
-                                position [left: state.screen_cursor_x, top: state.screen_cursor_y]
-                                    container [height: 1, width: 1, foreground: "black", background: "green"]
+                                if state.show_cursor
+                                    position [left: state.screen_cursor_x, top: state.screen_cursor_y]
+                                        container [height: 1, width: 1, foreground: "black", background: "green"]
 
                                 if state.popup
                                     position [left: state.screen_cursor_x, top: state.screen_cursor_y]
                                         @popup [message: state.popup]
+
+        // Command line
+        if state.command_buffer
+            hstack [background: #111, foreground: "grey"]
+                text state.command_buffer
+                container [width: 1, height: 1, background: "green"]
+                spacer
 
         // Status bar
         @status [row: state.cursor_y, col: state.cursor_x, title: state.title, debug: state.debug]

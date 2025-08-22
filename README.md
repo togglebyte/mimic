@@ -13,7 +13,7 @@ load "src/main.rs" as main
 extension "rs"
 speed 20
 jitter 20
-linepause 300
+line_pause 300
 
 type main
 ```
@@ -139,7 +139,7 @@ Default: `20`
 
 Set the speed for which to wait after each newline char is typed
 
-Syntax: `linepause <milliseconds>`
+Syntax: `line_pause|linepause <milliseconds>`
 Default: `0`
             
 ## Replace
@@ -199,11 +199,11 @@ Show a popup message
 
 Syntax: `popup <string>|<ident>`
 
-## ClosePopup
+## Close popup
 
 Close a popup message
 
-Syntax: `closepopup`
+Syntax: `close_popup|closepopup`
 
 ## Find
 
@@ -225,3 +225,15 @@ Write the buffer to disk.
 This will fail if the file already exists.
 
 Syntax: `write <path>`.
+
+## Command
+
+Simulate typing a command to the command line in the editor
+
+Syntax: `command <string>|<ident>`
+
+## Command clear timeout
+
+Clear the command line after N milliseconds
+
+Syntax: `command_clear_timeout <milliseconds>`

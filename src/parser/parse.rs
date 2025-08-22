@@ -70,6 +70,8 @@ impl<'src> Parser<'src> {
             Token::Popup => self.popup(),
             Token::ClosePopup => self.closepopup(),
             Token::WriteBuffer => self.write_buffer(),
+            Token::Command => self.command(),
+            Token::CommandClear => self.command_clear(),
             Token::Wait => self.wait(),
             token => Error::invalid_instruction(token, self.tokens.spans(), self.tokens.source),
         }
@@ -303,6 +305,25 @@ impl<'src> Parser<'src> {
         let instr = match self.tokens.take() {
             Token::Str(path) => Instruction::WriteBuffer(path.into()),
             token => return Error::invalid_arg("string", token, self.tokens.spans(), self.tokens.source),
+        };
+
+        Ok(instr)
+    }
+
+    fn command(&mut self) -> Result<Instruction> {
+        let instr = match self.tokens.take() {
+            Token::Str(cmd) => Instruction::Command(Source::Str(cmd)),
+            Token::Ident(cmd) => Instruction::Command(Source::Ident(cmd)),
+            token => return Error::invalid_arg("string", token, self.tokens.spans(), self.tokens.source),
+        };
+
+        Ok(instr)
+    }
+
+    fn command_clear(&mut self) -> Result<Instruction> {
+        let instr = match self.tokens.take() {
+            Token::Int(millis) => Instruction::CommandClearTimeout(millis as u64),
+            token => return Error::invalid_arg("milliseconds", token, self.tokens.spans(), self.tokens.source),
         };
 
         Ok(instr)

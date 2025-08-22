@@ -103,6 +103,17 @@ pub struct DocState {
     debug: Value<String>,
     show_line_numbers: Value<bool>,
     popup: Value<String>,
+    command_buffer: Value<String>,
+    show_cursor: Value<bool>,
+}
+
+impl DocState {
+    pub fn new() -> Self {
+        Self {
+            show_cursor: true.into(),
+            ..Default::default()
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -144,6 +155,7 @@ pub struct Editor {
     selected_range: Option<VisualRange>,
     instructions: VecDeque<Instruction>,
     type_buffer: TextBuffer,
+    type_command_buffer: TextBuffer,
     highlighter: Highlighter,
     buffer: CanvasBuffer,
     lines: InactiveScratch,
@@ -153,6 +165,7 @@ pub struct Editor {
     audio: AudioShell,
     frame_timer: Timer,
     size: Size,
+    command_clear_timeout: Duration,
 }
 
 impl Editor {
@@ -164,6 +177,7 @@ impl Editor {
             selected_range: None,
             instructions: instructions.into(),
             type_buffer: TextBuffer::new(),
+            type_command_buffer: TextBuffer::new(),
             highlighter,
             buffer: CanvasBuffer::default(),
             lines: InactiveScratch::new(),
@@ -173,6 +187,7 @@ impl Editor {
             audio: AudioShell::new(),
             frame_timer: Timer::new(frame_time),
             size: Size::ZERO,
+            command_clear_timeout: Duration::from_secs(1),
         }
     }
 
@@ -182,12 +197,17 @@ impl Editor {
     }
 
     fn apply(&mut self, state: &mut DocState) -> RenderAction {
+        if let Some(s) = self.type_command_buffer.next() {
+            state.command_buffer.to_mut().push_str(s);
+            return RenderAction::Render;
+        }
+
         // If we have something to type then do that.
         // otherwise load the next instruction
         if let Some(s) = self.type_buffer.next() {
-            // type next char
-            self.audio.play(s);
             self.doc.insert_str(self.cursor, s);
+
+            self.audio.play(s);
 
             if s == "\n" {
                 self.cursor.x = 0;
@@ -209,6 +229,10 @@ impl Editor {
             None => return RenderAction::Skip,
             Some(instruction) => {
                 match instruction {
+                    Instruction::LoadCommandBuffer(content) => {
+                        state.show_cursor.set(false);
+                        self.type_command_buffer.push(content);
+                    }
                     Instruction::LoadTypeBuffer(content) => {
                         // Make markers and all that what what
                         let (content, markers) = generate(content);
@@ -308,6 +332,14 @@ impl Editor {
                             }
                         }
                     },
+                    Instruction::ClearCommandBuffer => {
+                        state.command_buffer.to_mut().clear();
+                        state.show_cursor.set(true);
+                    }
+                    Instruction::CommandClearTimeout(duration) => self.command_clear_timeout = duration,
+                    Instruction::ClearCommandWait => self
+                        .instructions
+                        .push_front(Instruction::Wait(self.command_clear_timeout)),
                 }
             }
         }
