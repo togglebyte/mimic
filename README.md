@@ -237,3 +237,16 @@ Syntax: `command <string>|<ident>`
 Clear the command line after N milliseconds
 
 Syntax: `command_clear_timeout <milliseconds>`
+
+## Set
+
+Set a context value in the template
+
+Syntax: `set <ident> <string>|<bool>|<int>`
+
+**Note** This instruction is only relevant in the context of the template.
+
+This can be accessed in the template as `state.ctx.<ident>`.
+
+For more information on how this works see [Anathema](https://crates.io/crates/anathema).
+

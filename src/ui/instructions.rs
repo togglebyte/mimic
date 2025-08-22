@@ -4,6 +4,7 @@ use std::time::Duration;
 use anathema::geometry::{Pos, Size};
 
 use super::markers::Markers;
+use crate::parser::Variable;
 
 #[derive(Debug)]
 pub enum Instruction {
@@ -53,4 +54,5 @@ pub enum Instruction {
     Clear,
 
     WriteBuffer(PathBuf),
+    SetVariable(String, Variable)
 }

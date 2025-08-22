@@ -25,6 +25,13 @@ pub enum Source {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum Variable {
+    Bool(bool),
+    Str(String),
+    Int(i64),
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Instruction {
     Load(PathBuf, String),
     WriteBuffer(PathBuf),
@@ -72,6 +79,8 @@ pub enum Instruction {
     ClosePopup,
     Clear,
     Wait(u64),
+
+    SetVariable(String, Variable),
 }
 
 #[derive(Debug)]

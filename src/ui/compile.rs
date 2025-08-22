@@ -125,6 +125,9 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
             crate::parser::Instruction::CommandClearTimeout(timeout) => {
                 instructions.push(Instruction::CommandClearTimeout(Duration::from_millis(timeout)))
             }
+            crate::parser::Instruction::SetVariable(name, variable) => {
+                instructions.push(Instruction::SetVariable(name, variable))
+            }
         }
     }
 

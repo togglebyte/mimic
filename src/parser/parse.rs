@@ -1,6 +1,7 @@
+use super::error::{Error, Result};
 use super::instruction::{Dest, Instruction, Instructions, Source};
 use super::token::{Token, Tokens};
-use super::error::{Error, Result};
+use crate::parser::Variable;
 
 struct Parser<'src> {
     tokens: Tokens<'src>,
@@ -72,6 +73,7 @@ impl<'src> Parser<'src> {
             Token::WriteBuffer => self.write_buffer(),
             Token::Command => self.command(),
             Token::CommandClear => self.command_clear(),
+            Token::SetVariable => self.set_variable(),
             Token::Wait => self.wait(),
             token => Error::invalid_instruction(token, self.tokens.spans(), self.tokens.source),
         }
@@ -324,6 +326,30 @@ impl<'src> Parser<'src> {
         let instr = match self.tokens.take() {
             Token::Int(millis) => Instruction::CommandClearTimeout(millis as u64),
             token => return Error::invalid_arg("milliseconds", token, self.tokens.spans(), self.tokens.source),
+        };
+
+        Ok(instr)
+    }
+
+    fn set_variable(&mut self) -> Result<Instruction> {
+        let instr = match self.tokens.take() {
+            Token::Ident(name) => {
+                let var = match self.tokens.take() {
+                    Token::Int(i) => Variable::Int(i),
+                    Token::Str(s) => Variable::Str(s),
+                    Token::Bool(b) => Variable::Bool(b),
+                    token => {
+                        return Error::invalid_arg(
+                            "either a boolean, string or integer",
+                            token,
+                            self.tokens.spans(),
+                            self.tokens.source,
+                        );
+                    }
+                };
+                Instruction::SetVariable(name, var)
+            }
+            token => return Error::invalid_arg("ident", token, self.tokens.spans(), self.tokens.source),
         };
 
         Ok(instr)

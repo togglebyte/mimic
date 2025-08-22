@@ -1,4 +1,4 @@
-pub use instruction::{Dest, Instruction, Instructions, Source};
+pub use instruction::{Dest, Instruction, Instructions, Source, Variable};
 
 mod error;
 mod instruction;

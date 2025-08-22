@@ -169,6 +169,7 @@ impl<'src> Lexer<'src> {
             "popup" => Token::Popup,
             "replace" => Token::Replace,
             "select" => Token::Select,
+            "set" => Token::SetVariable,
             "speed" => Token::Speed,
             "theme" => Token::Theme,
             "title" => Token::SetTitle,

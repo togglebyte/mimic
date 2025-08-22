@@ -105,6 +105,7 @@ pub struct DocState {
     popup: Value<String>,
     command_buffer: Value<String>,
     show_cursor: Value<bool>,
+    ctx: Value<Map<Box<dyn State>>>,
 }
 
 impl DocState {
@@ -340,6 +341,14 @@ impl Editor {
                     Instruction::ClearCommandWait => self
                         .instructions
                         .push_front(Instruction::Wait(self.command_clear_timeout)),
+                    Instruction::SetVariable(name, variable) => {
+                        let value: Box<dyn State> = match variable {
+                            crate::parser::Variable::Bool(var) => Box::new(var),
+                            crate::parser::Variable::Str(var) => Box::new(var),
+                            crate::parser::Variable::Int(var) => Box::new(var),
+                        };
+                        state.ctx.to_mut().insert(name, value);
+                    }
                 }
             }
         }
