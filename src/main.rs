@@ -1,10 +1,6 @@
 use std::env::args;
 
-use parser::parse;
-use ui::compile;
-
-mod parser;
-mod ui;
+use mimic::{compile, parse};
 
 fn help() {
     println!(
@@ -31,21 +27,21 @@ fn main() -> anyhow::Result<()> {
         return Ok(());
     };
 
-    ui::setup_paths::ensure_exists()?;
+    mimic::setup_paths::ensure_exists()?;
 
     if arg == "--syntax" {
-        ui::print_syntaxes();
+        mimic::print_syntaxes();
         return Ok(());
     }
 
     if arg == "--themes" {
-        ui::print_themes();
+        mimic::print_themes();
         return Ok(());
     }
 
     let echo = std::fs::read_to_string(arg)?;
     let instructions = parse(&echo)?;
     let instructions = compile(instructions)?;
-    ui::run(instructions)?;
+    mimic::run(instructions)?;
     Ok(())
 }

@@ -15,7 +15,7 @@ mod context;
 mod document;
 mod editor;
 mod error;
-mod instructions;
+pub mod instructions;
 mod markers;
 mod random;
 pub(crate) mod syntax;
