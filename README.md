@@ -250,3 +250,9 @@ This can be accessed in the template as `state.ctx.<ident>`.
 
 For more information on how this works see [Anathema](https://crates.io/crates/anathema).
 
+## Include
+
+Include another echo file. 
+This file will have its own context (meaning given `load "x" as x` `x` is only relevant in the included echo file).
+
+Syntax: `include "other.echo"`

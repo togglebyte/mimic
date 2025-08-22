@@ -160,6 +160,7 @@ impl<'src> Lexer<'src> {
             "find" => Token::Find,
             "finde" => Token::FindEnd,
             "goto" => Token::Goto,
+            "include" => Token::Include,
             "insert" => Token::Insert,
             "jitter" => Token::Jitter,
             "linepause" | "line_pause" => Token::LinePause,

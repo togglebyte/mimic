@@ -1,5 +1,6 @@
 * 0.1.6
     * New `set` command that sets context values for the template
+    * New `include` command that includes another echo file
 * 0.1.5
     * New `command` command that prints to the command line of the editor
     * New `command_clear_timeout` command that clears the command line after a while

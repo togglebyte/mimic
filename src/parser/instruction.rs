@@ -34,6 +34,7 @@ pub enum Variable {
 #[derive(Debug, PartialEq)]
 pub enum Instruction {
     Load(PathBuf, String),
+    Include(Instructions),
     WriteBuffer(PathBuf),
     Find { needle: String, count: usize },
     FindEnd { needle: String, count: usize },
@@ -83,7 +84,7 @@ pub enum Instruction {
     SetVariable(String, Variable),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Instructions {
     inner: Vec<Instruction>,
 }

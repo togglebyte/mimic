@@ -74,6 +74,7 @@ impl<'src> Parser<'src> {
             Token::Command => self.command(),
             Token::CommandClear => self.command_clear(),
             Token::SetVariable => self.set_variable(),
+            Token::Include => self.include(),
             Token::Wait => self.wait(),
             token => Error::invalid_instruction(token, self.tokens.spans(), self.tokens.source),
         }
@@ -350,6 +351,23 @@ impl<'src> Parser<'src> {
                 Instruction::SetVariable(name, var)
             }
             token => return Error::invalid_arg("ident", token, self.tokens.spans(), self.tokens.source),
+        };
+
+        Ok(instr)
+    }
+
+    fn include(&mut self) -> Result<Instruction> {
+        let instr = match self.tokens.take() {
+            Token::Str(path) => {
+                let src = match std::fs::read_to_string(&path) {
+                    Ok(src) => src,
+                    Err(_) => return Error::invalid_include_path(path, self.tokens.spans(), self.tokens.source),
+                };
+                let tokens = crate::parser::lexer::lex(&src)?;
+                let instructions = parse(tokens)?;
+                Instruction::Include(instructions)
+            }
+            token => return Error::invalid_arg("string", token, self.tokens.spans(), self.tokens.source),
         };
 
         Ok(instr)

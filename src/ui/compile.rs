@@ -128,6 +128,7 @@ pub fn compile(parsed_instructions: crate::parser::Instructions) -> Result<Vec<I
             crate::parser::Instruction::SetVariable(name, variable) => {
                 instructions.push(Instruction::SetVariable(name, variable))
             }
+            crate::parser::Instruction::Include(i) => instructions.extend(compile(i)?),
         }
     }
 

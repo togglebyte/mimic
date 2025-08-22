@@ -41,6 +41,10 @@ impl Error {
         Self::err(ErrorKind::InvalidInstruction(token), spans, source)
     }
 
+    pub(crate) fn invalid_include_path<T>(path: String, spans: (Span, Span), source: impl Into<String>) -> Result<T> {
+        Self::err(ErrorKind::InvalidIncludePath(path), spans, source)
+    }
+
     pub(crate) fn invalid_arg<T>(
         expected: &'static str,
         token: Token,
@@ -110,6 +114,7 @@ pub enum ErrorKind {
     InvalidArg { expected: &'static str, found: String },
     InvalidInstruction(Token),
     UnexpectedToken { expected: &'static str, found: String },
+    InvalidIncludePath(String),
 }
 
 impl Display for ErrorKind {
@@ -122,6 +127,7 @@ impl Display for ErrorKind {
             ErrorKind::UnexpectedToken { expected, found } => {
                 write!(f, "unexpected token, `{expected}`, found `{found}`")
             }
+            ErrorKind::InvalidIncludePath(path) => write!(f, "invalid include path: `{path}`"),
         }
     }
 }
