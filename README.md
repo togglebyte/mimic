@@ -130,7 +130,9 @@ Syntax: `wait <seconds>`
 
 ## Speed
 
-This value is given in number of instructions per second.
+This value is given in number of characters per second.
+Note that `line_pause` will be respected between characters if a newline is
+written.
 
 Syntax: `speed <integer>`
 Default: `20`

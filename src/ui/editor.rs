@@ -81,7 +81,7 @@ impl Timer {
 //   - Render action -
 // -----------------------------------------------------------------------------
 enum RenderAction {
-    Render,
+    NextInstruction,
     Skip,
     NextFrame,
 }
@@ -200,7 +200,7 @@ impl Editor {
     fn apply(&mut self, state: &mut DocState) -> RenderAction {
         if let Some(s) = self.type_command_buffer.next() {
             state.command_buffer.to_mut().push_str(s);
-            return RenderAction::Render;
+            return RenderAction::NextFrame;
         }
 
         // If we have something to type then do that.
@@ -222,7 +222,7 @@ impl Editor {
                 self.cursor.x += s.width() as i32;
             }
 
-            return RenderAction::Render;
+            return RenderAction::NextFrame;
         }
 
         let instruction = self.instructions.pop_front();
@@ -267,12 +267,12 @@ impl Editor {
                     Instruction::JumpToMarker(name) => {
                         let Some(row) = self.doc.lookup_marker(&name).map(|m| m.row) else {
                             self.error(state, format!("marker \"{name}\" does not exist"));
-                            return RenderAction::Render;
+                            return RenderAction::NextFrame;
                         };
                         self.cursor.y = row as i32;
                         self.cursor.x = 0;
                     }
-                    Instruction::Select(size) if size == Size::ZERO => return RenderAction::Render,
+                    Instruction::Select(size) if size == Size::ZERO => return RenderAction::NextInstruction,
                     Instruction::Select(size) => {
                         let visual_range = VisualRange::new(self.cursor, size);
                         self.cursor = visual_range.region.to - Pos::new(1, 1);
@@ -290,15 +290,13 @@ impl Editor {
                         return RenderAction::NextFrame;
                     }
                     Instruction::Speed(dur) => self.frame_timer.frame_time = dur,
+                    Instruction::FindInCurrentLine { needle, .. } if needle.is_empty() => (),
                     Instruction::FindInCurrentLine {
                         needle,
                         end_of_word,
                         count,
                     } => {
-                        if needle.is_empty() {
-                            return RenderAction::Render;
-                        }
-                        let Some(x) = self.doc.find(self.cursor, &needle, count) else { return RenderAction::Render };
+                        let Some(x) = self.doc.find(self.cursor, &needle, count) else { return RenderAction::NextInstruction };
                         self.cursor.x = x as i32;
                         if end_of_word {
                             self.cursor.x += needle.width() as i32 - 1;
@@ -353,7 +351,7 @@ impl Editor {
             }
         }
 
-        RenderAction::Render
+        RenderAction::NextInstruction
     }
 
     fn update_cursor(&mut self, state: &mut DocState) {
@@ -463,13 +461,12 @@ impl Component for Editor {
         let mut render = false;
 
         while count > 0 {
-            count -= 1;
             match self.apply(state) {
-                RenderAction::Render => render = true,
-                RenderAction::Skip => (),
+                RenderAction::NextInstruction => render = true,
+                RenderAction::Skip => break,
                 RenderAction::NextFrame => {
+                    count -= 1;
                     render = true;
-                    break;
                 }
             }
         }

@@ -1,5 +1,7 @@
 * 0.1.7
     * Mimic can now be used as a lib
+    * Instructions are executed without wait unless they are typing / command
+      outputs
 * 0.1.6
     * New `set` command that sets context values for the template
     * New `include` command that includes another echo file
